@@ -1,6 +1,7 @@
 package com.example.android.carshop;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -16,20 +17,20 @@ import android.widget.Toast;
 
 import com.example.android.carshop.database.AppDatabase;
 import com.example.android.carshop.database.Car;
+import com.squareup.picasso.Picasso;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.OnLongClick;
+import butterknife.OnTextChanged;
 import butterknife.Unbinder;
 import io.reactivex.Completable;
 import io.reactivex.CompletableObserver;
-import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Action;
 import io.reactivex.schedulers.Schedulers;
 
 public class CarAdditionFragment extends Fragment {
@@ -48,6 +49,9 @@ public class CarAdditionFragment extends Fragment {
 
     private Unbinder unbinder;
     private AppDatabase database;
+    private AlertDialog alertDialog;
+
+    private String selectedUri;
 
     @NonNull
     public static CarAdditionFragment newInstance() {
@@ -82,7 +86,7 @@ public class CarAdditionFragment extends Fragment {
         progressDialog.show();
 
         Completable.fromAction(() ->
-                database.carDao().addCar(new Car(image.getTransitionName(),
+                database.carDao().addCar(new Car(selectedUri,
                         modelEditText.getText().toString(),
                         priceEditText.getText().toString())))
                 .delay(3, TimeUnit.SECONDS)
@@ -108,5 +112,50 @@ public class CarAdditionFragment extends Fragment {
                         Toast.makeText(getContext(), "Ошибка при сохранении", Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    @OnLongClick(R.id.add_car_image)
+    public boolean onImageLongClick() {
+        alertDialog = createAlertDialogWithRadioButtonGroup();
+        alertDialog.setOnDismissListener(dialog -> {
+            Picasso.get()
+                    .load(selectedUri)
+                    .error(R.drawable.error_image)
+                    .placeholder(R.drawable.progress_animation)
+                    .resize(100, 100)
+                    .centerCrop()
+                    .into(image);
+        });
+        alertDialog.show();
+        return false;
+    }
+
+    public AlertDialog createAlertDialogWithRadioButtonGroup() {
+        CharSequence[] values = {"Машина 1", "Машина 2", "Машина 3"};
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Выберите фото");
+        builder.setSingleChoiceItems(values, -1, (dialog, item) -> {
+            switch (item) {
+                case 0:
+                    selectedUri = "http://upload.wikimedia.org/wikipedia/en/2/2d/Front_left_of_car.jpg";
+                    break;
+                case 1:
+                    selectedUri = "http://www.cstatic-images.com/stock/1170x1170/51/img2009963547-1523467186951.jpg";
+                    break;
+                case 2:
+                    selectedUri = "http://i.ytimg.com/vi/UKKIUoNsG08/maxresdefault.jpg";
+                    break;
+            }
+            alertDialog.dismiss();
+        });
+        alertDialog = builder.create();
+        return alertDialog;
+    }
+
+    @OnTextChanged({R.id.add_car_model, R.id.add_car_price})
+    public void onTextChanged() {
+        saveButton.setEnabled(!modelEditText.getText().toString().isEmpty()
+            && !priceEditText.getText().toString().isEmpty());
     }
 }

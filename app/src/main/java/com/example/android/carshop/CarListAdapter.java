@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.android.carshop.database.Car;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,7 +26,13 @@ class CarListAdapter extends RecyclerView.Adapter {
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-//        ((CarListViewHolder) holder).image.setImageResource(cars.get(position).getImageUri());
+        Picasso.get()
+                .load(cars.get(position).getImageUri())
+                .error(R.drawable.error_image)
+                .placeholder(R.drawable.progress_animation)
+                .resize(100, 100)
+                .centerCrop()
+                .into(((CarListViewHolder) holder).image);
         ((CarListViewHolder) holder).model.setText(cars.get(position).getModel());
         ((CarListViewHolder) holder).price.setText(cars.get(position).getPrice());
     }
