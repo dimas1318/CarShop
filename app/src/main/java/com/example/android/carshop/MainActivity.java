@@ -4,6 +4,8 @@ import android.arch.persistence.room.Room;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import com.example.android.carshop.database.AppDatabase;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
