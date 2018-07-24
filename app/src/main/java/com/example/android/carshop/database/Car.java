@@ -9,7 +9,7 @@ import java.util.Objects;
 @Entity(tableName = "cars")
 public class Car {
 
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     private long id;
 
     @ColumnInfo(name = "price")
@@ -22,6 +22,12 @@ public class Car {
     private String imageUri;
 
     public Car() {
+    }
+
+    public Car(String imageUri, String model, String price) {
+        this.imageUri = imageUri;
+        this.model = model;
+        this.price = price;
     }
 
     public long getId() {

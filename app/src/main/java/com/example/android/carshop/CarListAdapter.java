@@ -10,10 +10,11 @@ import com.example.android.carshop.database.Car;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 class CarListAdapter extends RecyclerView.Adapter {
 
-    private ArrayList<Car> cars;
+    private List<Car> cars = new ArrayList<>();
 
     @NonNull
     @Override

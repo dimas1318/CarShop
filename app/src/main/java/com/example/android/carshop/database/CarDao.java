@@ -7,6 +7,7 @@ import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Update;
 
 import java.util.Collection;
+import java.util.List;
 
 @Dao
 public interface CarDao {
@@ -18,7 +19,7 @@ public interface CarDao {
     void addCars(Collection<Car> cars);
 
     @Query("SELECT * FROM cars")
-    Car getAllCars();
+    List<Car> getAllCars();
 
     @Query("SELECT * FROM cars WHERE id = :id")
     Car findCar(long id);

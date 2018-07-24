@@ -33,14 +33,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="top|end"
-        android:layout_marginTop="80dp"
-        android:layout_marginStart="170dp">
+        android:layout_marginStart="170dp"
+        android:layout_marginTop="80dp">
 
         <EditText
             android:id="@+id/add_car_price"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/price"
+            android:inputType="number"
             android:maxLines="1"
             android:singleLine="true"
             android:textColor="@color/black"
@@ -52,6 +53,6 @@
         android:id="@+id/save_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/save"
-        android:layout_gravity="bottom"/>
+        android:layout_gravity="bottom"
+        android:text="@string/save" />
 </FrameLayout>

@@ -8,12 +8,41 @@ import com.example.android.carshop.database.AppDatabase;
 
 public class MainActivity extends AppCompatActivity {
 
+    private AppDatabase database;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        AppDatabase database = Room.databaseBuilder(this,
+        database = Room.databaseBuilder(this,
                 AppDatabase.class, "car_database").build();
+
+        navigateToCarListFragment();
+    }
+
+    private void navigateToCarListFragment() {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.container, CarListFragment.newInstance())
+                .addToBackStack(CarListFragment.class.getSimpleName())
+                .commit();
+    }
+
+    public void navigateToCarAdditionFragment() {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.container, CarAdditionFragment.newInstance())
+                .addToBackStack(CarAdditionFragment.class.getSimpleName())
+                .commit();
+    }
+
+    public void popBackStack() {
+        getSupportFragmentManager()
+                .popBackStack();
+    }
+
+    public AppDatabase getDatabase() {
+        return database;
     }
 }
