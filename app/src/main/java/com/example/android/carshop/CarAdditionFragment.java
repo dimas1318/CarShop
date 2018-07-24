@@ -15,7 +15,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
-public class CarAddition extends Fragment {
+public class CarAdditionFragment extends Fragment {
 
     @BindView(R.id.add_car_image)
     ImageView image;
@@ -32,8 +32,8 @@ public class CarAddition extends Fragment {
     private Unbinder unbinder;
 
     @NonNull
-    public static CarAddition newInstance() {
-        return new CarAddition();
+    public static CarAdditionFragment newInstance() {
+        return new CarAdditionFragment();
     }
 
     @Override
