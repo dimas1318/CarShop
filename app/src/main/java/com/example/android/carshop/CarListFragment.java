@@ -127,37 +127,40 @@ public class CarListFragment extends Fragment implements OnItemSelectedListener 
                 // Add edit screen
                 break;
             case R.id.menu_delete:
-                ProgressDialog progressDialog = new ProgressDialog(getContext());
-                progressDialog.setMessage("Сохранение модели...");
-                progressDialog.setIndeterminate(true);
-                progressDialog.show();
-
-                Completable.fromAction(() ->
-                        database.carDao().removeCar(car))
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .doOnTerminate(() -> {
-                            if (progressDialog.isShowing()) {
-                                progressDialog.dismiss();
-                            }
-                        })
-                        .subscribe(new CompletableObserver() {
-                            @Override
-                            public void onSubscribe(Disposable d) {
-                            }
-
-                            @Override
-                            public void onComplete() {
-                                adapter.remove(car);
-                            }
-
-                            @Override
-                            public void onError(Throwable e) {
-                                Toast.makeText(getContext(), "Ошибка при удалении", Toast.LENGTH_SHORT).show();
-                            }
-                        });
+                removeCar(car);
                 break;
         }
+    }
 
+    private void removeCar(Car car) {
+        ProgressDialog progressDialog = new ProgressDialog(getContext());
+        progressDialog.setMessage("Сохранение модели...");
+        progressDialog.setIndeterminate(true);
+        progressDialog.show();
+
+        Completable.fromAction(() ->
+                database.carDao().removeCar(car))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnTerminate(() -> {
+                    if (progressDialog.isShowing()) {
+                        progressDialog.dismiss();
+                    }
+                })
+                .subscribe(new CompletableObserver() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        adapter.remove(car);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Toast.makeText(getContext(), "Ошибка при удалении", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 }
