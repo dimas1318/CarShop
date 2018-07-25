@@ -8,24 +8,21 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.example.android.carshop.R;
+import com.example.android.carshop.databinding.CarBinding;
 import com.example.android.carshop.model.Car;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 class CarListAdapter extends RecyclerView.Adapter {
 
-    private List<Car> cars = new ArrayList<>();
+//    private List<Car> cars = new ArrayList<>();
+    private List<CarModelView> cars = new ArrayList<>();
     private OnItemSelectedListener listener;
+    private LayoutInflater layoutInflater;
 
     public CarListAdapter(OnItemSelectedListener listener) {
         this.listener = listener;
@@ -34,21 +31,30 @@ class CarListAdapter extends RecyclerView.Adapter {
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_car_list_item, parent, false);
-        return new CarListViewHolder(v);
+//        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_car_list_item, parent, false);
+//        return new CarListViewHolder(v);
+
+        if (layoutInflater == null) {
+            layoutInflater = LayoutInflater.from(parent.getContext());
+        }
+        CarBinding carBinding = CarBinding.inflate(layoutInflater, parent, false);
+        return new CarListViewHolder(carBinding);
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        Picasso.get()
-                .load(cars.get(position).getImageUri())
-                .error(R.drawable.error_image)
-                .placeholder(R.drawable.progress_animation)
-                .resize(100, 100)
-                .centerCrop()
-                .into(((CarListViewHolder) holder).image);
-        ((CarListViewHolder) holder).model.setText(cars.get(position).getModel());
-        ((CarListViewHolder) holder).price.setText(cars.get(position).getPrice());
+//        Picasso.get()
+//                .load(cars.get(position).getImageUri())
+//                .error(R.drawable.error_image)
+//                .placeholder(R.drawable.progress_animation)
+//                .resize(100, 100)
+//                .centerCrop()
+//                .into(((CarListViewHolder) holder).image);
+//        ((CarListViewHolder) holder).model.setText(cars.get(position).getModel());
+//        ((CarListViewHolder) holder).price.setText(cars.get(position).getPrice());
+
+        CarModelView carModel = cars.get(position);
+        ((CarListViewHolder) holder).bind(carModel);
     }
 
     @Override
@@ -56,17 +62,17 @@ class CarListAdapter extends RecyclerView.Adapter {
         return cars.size();
     }
 
-    public void add(Car car) {
+    public void add(CarModelView car) {
         this.cars.add(car);
         notifyDataSetChanged();
     }
 
-    public void remove(Car car) {
+    public void remove(CarModelView car) {
         this.cars.remove(car);
         notifyDataSetChanged();
     }
 
-    public void set(Collection<Car> cars) {
+    public void set(Collection<CarModelView> cars) {
         this.cars = new ArrayList<>(cars);
         notifyDataSetChanged();
     }
@@ -74,19 +80,30 @@ class CarListAdapter extends RecyclerView.Adapter {
     class CarListViewHolder extends RecyclerView.ViewHolder
             implements View.OnCreateContextMenuListener, PopupMenu.OnMenuItemClickListener {
 
-        @BindView(R.id.list_car_image)
-        ImageView image;
+//        @BindView(R.id.list_car_image)
+//        ImageView image;
+//
+//        @BindView(R.id.list_car_model)
+//        TextView model;
+//
+//        @BindView(R.id.list_car_price)
+//        TextView price;
+        private CarBinding carBinding;
 
-        @BindView(R.id.list_car_model)
-        TextView model;
+        public CarListViewHolder(CarBinding carBinding/*View itemView*/) {
+            super(carBinding.getRoot()/*itemView*/);
+            this.carBinding = carBinding;
+//            ButterKnife.bind(this, itemView);
+//            itemView.setOnCreateContextMenuListener(this);
+            carBinding.getRoot().setOnCreateContextMenuListener(this);
+        }
 
-        @BindView(R.id.list_car_price)
-        TextView price;
+        public void bind(CarModelView carModel) {
+            this.carBinding.setCarModelView(carModel);
+        }
 
-        public CarListViewHolder(View itemView) {
-            super(itemView);
-            ButterKnife.bind(this, itemView);
-            itemView.setOnCreateContextMenuListener(this);
+        public CarBinding getCarBinding() {
+            return carBinding;
         }
 
         @Override
@@ -100,7 +117,9 @@ class CarListAdapter extends RecyclerView.Adapter {
         @Override
         public boolean onMenuItemClick(MenuItem item) {
             if (listener != null) {
-                Car car = cars.get(getAdapterPosition());
+                CarModelView carModel = cars.get(getAdapterPosition());
+                Car car = new Car(carModel.getImageUri(), carModel.getModel(), carModel.getPrice());
+                car.setId(carModel.getId());
                 listener.onMenuAction(car, item);
             }
             return false;

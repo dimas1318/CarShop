@@ -24,6 +24,7 @@ import com.example.android.carshop.model.Car;
 import com.example.android.carshop.model.CarMapper;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -105,6 +106,7 @@ public class CarListFragment extends Fragment implements OnItemSelectedListener 
                         progressDialog.dismiss();
                     }
                 })
+                .map(cars -> cars.stream().map(CarModelView::new).collect(Collectors.toList()))
                 .subscribe(list -> {
                     if (list == null || list.isEmpty()) {
                         noCarsTextView.setVisibility(View.VISIBLE);
@@ -159,7 +161,7 @@ public class CarListFragment extends Fragment implements OnItemSelectedListener 
 
                     @Override
                     public void onComplete() {
-                        adapter.remove(car);
+                        adapter.remove(new CarModelView(car));
                     }
 
                     @Override

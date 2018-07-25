@@ -1,40 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_margin="20dp">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <ImageView
-        android:id="@+id/list_car_image"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
-        android:src="@mipmap/ic_launcher" />
+    <data class="CarBinding">
 
-    <TextView
-        android:id="@+id/list_car_model"
+        <variable
+            name="CarModelView"
+            type="com.example.android.carshop.list.CarModelView" />
+    </data>
+
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|end"
-        android:layout_marginStart="170dp"
-        android:layout_marginTop="20dp"
-        android:maxLines="1"
-        android:singleLine="true"
-        android:textColor="@color/black"
-        android:textSize="20sp"
-        tools:text="model" />
+        android:layout_margin="20dp">
 
-    <TextView
-        android:id="@+id/list_car_price"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginBottom="20dp"
-        android:layout_marginStart="170dp"
-        android:maxLines="1"
-        android:singleLine="true"
-        android:textColor="@color/black"
-        android:textSize="20sp"
-        tools:text="price" />
+        <ImageView
+            android:id="@+id/list_car_image"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:src="@mipmap/ic_launcher"
+            app:imageUri="@{CarModelView.imageUri}" />
 
-</FrameLayout>
+        <TextView
+            android:id="@+id/list_car_model"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|end"
+            android:layout_marginStart="170dp"
+            android:layout_marginTop="20dp"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:text="@{CarModelView.model}"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            tools:text="model" />
+
+        <TextView
+            android:id="@+id/list_car_price"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginBottom="20dp"
+            android:layout_marginStart="170dp"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:text="@{CarModelView.price}"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            tools:text="price" />
+
+    </FrameLayout>
+</layout>
