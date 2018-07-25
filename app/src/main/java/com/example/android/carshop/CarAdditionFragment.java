@@ -3,6 +3,7 @@ package com.example.android.carshop;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -33,6 +34,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
+import static com.example.android.carshop.Constants.CAR_PARCELABLE;
+import static com.example.android.carshop.Constants.IS_CHANGE_FRAGMENT;
+
 public class CarAdditionFragment extends Fragment {
 
     @BindView(R.id.add_car_image)
@@ -54,8 +58,15 @@ public class CarAdditionFragment extends Fragment {
     private String selectedUri;
 
     @NonNull
-    public static CarAdditionFragment newInstance() {
-        return new CarAdditionFragment();
+    public static CarAdditionFragment newInstance(boolean isChangeFragment, CarParcelable carParcelable) {
+        CarAdditionFragment fragment = new CarAdditionFragment();
+
+        Bundle args = new Bundle();
+        args.putBoolean(IS_CHANGE_FRAGMENT, isChangeFragment);
+        args.putParcelable(CAR_PARCELABLE, carParcelable);
+        fragment.setArguments(args);
+
+        return fragment;
     }
 
     @Override
@@ -69,6 +80,20 @@ public class CarAdditionFragment extends Fragment {
         unbinder = ButterKnife.bind(this, view);
 
         database = ((MainActivity) getActivity()).getDatabase();
+
+        if (isChangeFragment()) {
+            Car car = CarMapper.mapFromParcelable(getCarParcelable());
+            modelEditText.setText(car.getModel());
+            priceEditText.setText(car.getPrice());
+            Picasso.get()
+                    .load(car.getImageUri())
+                    .error(R.drawable.error_image)
+                    .placeholder(R.drawable.progress_animation)
+                    .resize(100, 100)
+                    .centerCrop()
+                    .into(image);
+            selectedUri = car.getImageUri();
+        }
     }
 
     @Override
@@ -81,14 +106,23 @@ public class CarAdditionFragment extends Fragment {
     @OnClick(R.id.save_btn)
     public void onSaveClick() {
         ProgressDialog progressDialog = new ProgressDialog(getContext());
-        progressDialog.setMessage("Сохранение модели...");
+        progressDialog.setMessage(isChangeFragment() ? "Сохранение изменений..." : "Сохранение модели...");
         progressDialog.setIndeterminate(true);
         progressDialog.show();
 
-        Completable.fromAction(() ->
-                database.carDao().addCar(new Car(selectedUri,
-                        modelEditText.getText().toString(),
-                        priceEditText.getText().toString())))
+        Completable.fromAction(() -> {
+                    if (isChangeFragment()) {
+                        Car car = CarMapper.mapFromParcelable(getCarParcelable());
+                        car.setModel(modelEditText.getText().toString());
+                        car.setPrice(priceEditText.getText().toString());
+                        car.setImageUri(selectedUri);
+                        database.carDao().updateCar(car);
+                    } else {
+                        database.carDao().addCar(new Car(selectedUri,
+                                modelEditText.getText().toString(),
+                                priceEditText.getText().toString()));
+                    }
+                })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnTerminate(() -> {
@@ -132,9 +166,7 @@ public class CarAdditionFragment extends Fragment {
     public AlertDialog createAlertDialogWithRadioButtonGroup() {
         CharSequence[] values = {"Машина 1", "Машина 2", "Машина 3"};
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Выберите фото");
-        builder.setSingleChoiceItems(values, -1, (dialog, item) -> {
+        DialogInterface.OnClickListener listener = (dialog, item) -> {
             switch (item) {
                 case 0:
                     selectedUri = "http://upload.wikimedia.org/wikipedia/en/2/2d/Front_left_of_car.jpg";
@@ -147,7 +179,15 @@ public class CarAdditionFragment extends Fragment {
                     break;
             }
             alertDialog.dismiss();
-        });
+        };
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Выберите фото");
+        if (isChangeFragment()) {
+            builder.setSingleChoiceItems(values, findUriPosition(selectedUri), listener);
+        } else {
+            builder.setSingleChoiceItems(values, -1, listener);
+        }
         alertDialog = builder.create();
         return alertDialog;
     }
@@ -155,6 +195,27 @@ public class CarAdditionFragment extends Fragment {
     @OnTextChanged({R.id.add_car_model, R.id.add_car_price})
     public void onTextChanged() {
         saveButton.setEnabled(!modelEditText.getText().toString().isEmpty()
-            && !priceEditText.getText().toString().isEmpty());
+                && !priceEditText.getText().toString().isEmpty());
+    }
+
+    private boolean isChangeFragment() {
+        return getArguments().getBoolean(IS_CHANGE_FRAGMENT, false);
+    }
+
+    private CarParcelable getCarParcelable() {
+        return getArguments().getParcelable(CAR_PARCELABLE);
+    }
+
+    private int findUriPosition(String uri) {
+        switch (uri) {
+            case "http://upload.wikimedia.org/wikipedia/en/2/2d/Front_left_of_car.jpg":
+                return 0;
+            case "http://www.cstatic-images.com/stock/1170x1170/51/img2009963547-1523467186951.jpg":
+                return 1;
+            case "http://i.ytimg.com/vi/UKKIUoNsG08/maxresdefault.jpg":
+                return 2;
+            default:
+                return -1;
+        }
     }
 }

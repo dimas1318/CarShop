@@ -124,7 +124,9 @@ public class CarListFragment extends Fragment implements OnItemSelectedListener 
     public void onMenuAction(Car car, MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_edit:
-                // Add edit screen
+                if (getActivity() != null) {
+                    ((MainActivity) getActivity()).navigateToCarAdditionFragment(true, CarMapper.mapToParcelable(car));
+                }
                 break;
             case R.id.menu_delete:
                 removeCar(car);

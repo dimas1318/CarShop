@@ -30,9 +30,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void navigateToCarAdditionFragment() {
+        navigateToCarAdditionFragment(false, null);
+    }
+
+    public void navigateToCarAdditionFragment(boolean isChangeFragment, CarParcelable carParcelable) {
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.container, CarAdditionFragment.newInstance())
+                .replace(R.id.container, CarAdditionFragment.newInstance(isChangeFragment, carParcelable))
                 .addToBackStack(CarAdditionFragment.class.getSimpleName())
                 .commit();
     }
