@@ -3,6 +3,7 @@ package com.example.android.carshop.addition;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -18,13 +19,10 @@ import android.widget.Toast;
 
 import com.example.android.carshop.MainActivity;
 import com.example.android.carshop.R;
-import com.example.android.carshop.database.AppDatabase;
 import com.example.android.carshop.model.Car;
 import com.example.android.carshop.model.CarMapper;
 import com.example.android.carshop.model.CarParcelable;
 import com.squareup.picasso.Picasso;
-
-import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -32,16 +30,11 @@ import butterknife.OnClick;
 import butterknife.OnLongClick;
 import butterknife.OnTextChanged;
 import butterknife.Unbinder;
-import io.reactivex.Completable;
-import io.reactivex.CompletableObserver;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 import static com.example.android.carshop.Constants.CAR_PARCELABLE;
 import static com.example.android.carshop.Constants.IS_CHANGE_FRAGMENT;
 
-public class CarAdditionFragment extends Fragment {
+public class CarAdditionFragment extends Fragment implements CarAdditionView {
 
     @BindView(R.id.add_car_image)
     ImageView image;
@@ -56,10 +49,10 @@ public class CarAdditionFragment extends Fragment {
     Button saveButton;
 
     private Unbinder unbinder;
-    private AppDatabase database;
-    private AlertDialog alertDialog;
+    private CarAdditionPresenter presenter;
 
-    private String selectedUri;
+    private ProgressDialog progressDialog;
+    private AlertDialog alertDialog;
 
     @NonNull
     public static CarAdditionFragment newInstance(boolean isChangeFragment, CarParcelable carParcelable) {
@@ -82,21 +75,15 @@ public class CarAdditionFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         unbinder = ButterKnife.bind(this, view);
-
-        database = ((MainActivity) getActivity()).getDatabase();
+        presenter = new CarAdditionPresenter();
+        presenter.setView(this);
+        presenter.setDatabase(((MainActivity) getActivity()).getDatabase());
 
         if (isChangeFragment()) {
             Car car = CarMapper.mapFromParcelable(getCarParcelable());
             modelEditText.setText(car.getModel());
             priceEditText.setText(car.getPrice());
-            Picasso.get()
-                    .load(car.getImageUri())
-                    .error(R.drawable.error_image)
-                    .placeholder(R.drawable.progress_animation)
-                    .resize(100, 100)
-                    .centerCrop()
-                    .into(image);
-            selectedUri = car.getImageUri();
+            presenter.loadImageByUri(image, car.getImageUri());
         }
     }
 
@@ -109,91 +96,13 @@ public class CarAdditionFragment extends Fragment {
     @SuppressLint("CheckResult")
     @OnClick(R.id.save_btn)
     public void onSaveClick() {
-        ProgressDialog progressDialog = new ProgressDialog(getContext());
-        progressDialog.setMessage(isChangeFragment() ? "Сохранение изменений..." : "Сохранение модели...");
-        progressDialog.setIndeterminate(true);
-        progressDialog.show();
-
-        Completable.fromAction(() -> {
-            if (isChangeFragment()) {
-                Car car = CarMapper.mapFromParcelable(getCarParcelable());
-                car.setModel(modelEditText.getText().toString());
-                car.setPrice(priceEditText.getText().toString());
-                car.setImageUri(selectedUri);
-                database.carDao().updateCar(car);
-            } else {
-                database.carDao().addCar(new Car(selectedUri,
-                        modelEditText.getText().toString(),
-                        priceEditText.getText().toString()));
-            }
-        })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnTerminate(() -> {
-                    if (progressDialog.isShowing()) {
-                        progressDialog.dismiss();
-                    }
-                })
-                .subscribe(new CompletableObserver() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
-                    }
-
-                    @Override
-                    public void onComplete() {
-                        ((MainActivity) getActivity()).popBackStack();
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Toast.makeText(getContext(), "Ошибка при сохранении", Toast.LENGTH_SHORT).show();
-                    }
-                });
+        presenter.saveCar(modelEditText.getText().toString(), priceEditText.getText().toString());
     }
 
     @OnLongClick(R.id.add_car_image)
     public boolean onImageLongClick() {
-        alertDialog = createAlertDialogWithRadioButtonGroup();
-        alertDialog.setOnDismissListener(dialog -> {
-            Picasso.get()
-                    .load(selectedUri)
-                    .error(R.drawable.error_image)
-                    .placeholder(R.drawable.progress_animation)
-                    .resize(100, 100)
-                    .centerCrop()
-                    .into(image);
-        });
-        alertDialog.show();
+        presenter.renderAlertForImageChoice(image);
         return false;
-    }
-
-    public AlertDialog createAlertDialogWithRadioButtonGroup() {
-        CharSequence[] values = {"Машина 1", "Машина 2", "Машина 3"};
-
-        DialogInterface.OnClickListener listener = (dialog, item) -> {
-            switch (item) {
-                case 0:
-                    selectedUri = "http://upload.wikimedia.org/wikipedia/en/2/2d/Front_left_of_car.jpg";
-                    break;
-                case 1:
-                    selectedUri = "http://www.cstatic-images.com/stock/1170x1170/51/img2009963547-1523467186951.jpg";
-                    break;
-                case 2:
-                    selectedUri = "http://i.ytimg.com/vi/UKKIUoNsG08/maxresdefault.jpg";
-                    break;
-            }
-            alertDialog.dismiss();
-        };
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Выберите фото");
-        if (isChangeFragment()) {
-            builder.setSingleChoiceItems(values, findUriPosition(selectedUri), listener);
-        } else {
-            builder.setSingleChoiceItems(values, -1, listener);
-        }
-        alertDialog = builder.create();
-        return alertDialog;
     }
 
     @OnTextChanged({R.id.add_car_model, R.id.add_car_price})
@@ -202,24 +111,59 @@ public class CarAdditionFragment extends Fragment {
                 && !priceEditText.getText().toString().isEmpty());
     }
 
-    private boolean isChangeFragment() {
+    @Override
+    public boolean isChangeFragment() {
         return getArguments().getBoolean(IS_CHANGE_FRAGMENT, false);
     }
 
-    private CarParcelable getCarParcelable() {
+    @Override
+    public CarParcelable getCarParcelable() {
         return getArguments().getParcelable(CAR_PARCELABLE);
     }
 
-    private int findUriPosition(String uri) {
-        switch (uri) {
-            case "http://upload.wikimedia.org/wikipedia/en/2/2d/Front_left_of_car.jpg":
-                return 0;
-            case "http://www.cstatic-images.com/stock/1170x1170/51/img2009963547-1523467186951.jpg":
-                return 1;
-            case "http://i.ytimg.com/vi/UKKIUoNsG08/maxresdefault.jpg":
-                return 2;
-            default:
-                return -1;
+    @Override
+    public void showProgressDialog(String message) {
+        progressDialog = new ProgressDialog(getContext());
+        progressDialog.setMessage(message);
+        progressDialog.setIndeterminate(true);
+        progressDialog.show();
+    }
+
+    @Override
+    public void hideProgressDialog() {
+        if (progressDialog.isShowing()) {
+            progressDialog.dismiss();
         }
+    }
+
+    @Override
+    public void popBackStack() {
+        ((MainActivity) getActivity()).popBackStack();
+    }
+
+    @Override
+    public void showToast(String message) {
+        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void dismissAlertDialog() {
+        alertDialog.dismiss();
+    }
+
+    @Override
+    public AlertDialog buildAlertDialog(String title, CharSequence[] values, int position, DialogInterface.OnClickListener listener) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle(title);
+        builder.setSingleChoiceItems(values, position, listener);
+        alertDialog = builder.create();
+        return alertDialog;
+    }
+
+    @Override
+    public void showAlertWithImageLoading(ImageView image) {
+        alertDialog = presenter.createAlertDialogWithRadioButtonGroup();
+        alertDialog.setOnDismissListener(dialog -> presenter.loadImage(image));
+        alertDialog.show();
     }
 }
