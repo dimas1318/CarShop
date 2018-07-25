@@ -6,6 +6,8 @@ import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Update;
 
+import com.example.android.carshop.model.Car;
+
 import java.util.Collection;
 import java.util.List;
 

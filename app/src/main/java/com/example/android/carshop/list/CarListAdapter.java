@@ -1,4 +1,4 @@
-package com.example.android.carshop;
+package com.example.android.carshop.list;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.PopupMenu;
@@ -11,7 +11,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.android.carshop.database.Car;
+import com.example.android.carshop.R;
+import com.example.android.carshop.model.Car;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;

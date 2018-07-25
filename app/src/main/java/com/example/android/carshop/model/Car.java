@@ -1,4 +1,4 @@
-package com.example.android.carshop.database;
+package com.example.android.carshop.model;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;

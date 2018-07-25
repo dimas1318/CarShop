@@ -1,10 +1,13 @@
 package com.example.android.carshop;
 
 import android.arch.persistence.room.Room;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
+import com.example.android.carshop.addition.CarAdditionFragment;
 import com.example.android.carshop.database.AppDatabase;
+import com.example.android.carshop.list.CarListFragment;
+import com.example.android.carshop.model.CarParcelable;
 
 public class MainActivity extends AppCompatActivity {
 

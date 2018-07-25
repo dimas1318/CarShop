@@ -1,6 +1,4 @@
-package com.example.android.carshop;
-
-import com.example.android.carshop.database.Car;
+package com.example.android.carshop.model;
 
 public class CarMapper {
 

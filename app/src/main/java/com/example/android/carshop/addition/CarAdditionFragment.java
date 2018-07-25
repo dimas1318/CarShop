@@ -1,4 +1,4 @@
-package com.example.android.carshop;
+package com.example.android.carshop.addition;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -16,8 +16,12 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.example.android.carshop.MainActivity;
+import com.example.android.carshop.R;
 import com.example.android.carshop.database.AppDatabase;
-import com.example.android.carshop.database.Car;
+import com.example.android.carshop.model.Car;
+import com.example.android.carshop.model.CarMapper;
+import com.example.android.carshop.model.CarParcelable;
 import com.squareup.picasso.Picasso;
 
 import java.util.concurrent.TimeUnit;
@@ -111,18 +115,18 @@ public class CarAdditionFragment extends Fragment {
         progressDialog.show();
 
         Completable.fromAction(() -> {
-                    if (isChangeFragment()) {
-                        Car car = CarMapper.mapFromParcelable(getCarParcelable());
-                        car.setModel(modelEditText.getText().toString());
-                        car.setPrice(priceEditText.getText().toString());
-                        car.setImageUri(selectedUri);
-                        database.carDao().updateCar(car);
-                    } else {
-                        database.carDao().addCar(new Car(selectedUri,
-                                modelEditText.getText().toString(),
-                                priceEditText.getText().toString()));
-                    }
-                })
+            if (isChangeFragment()) {
+                Car car = CarMapper.mapFromParcelable(getCarParcelable());
+                car.setModel(modelEditText.getText().toString());
+                car.setPrice(priceEditText.getText().toString());
+                car.setImageUri(selectedUri);
+                database.carDao().updateCar(car);
+            } else {
+                database.carDao().addCar(new Car(selectedUri,
+                        modelEditText.getText().toString(),
+                        priceEditText.getText().toString()));
+            }
+        })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnTerminate(() -> {

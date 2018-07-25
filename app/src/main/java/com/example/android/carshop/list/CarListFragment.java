@@ -1,4 +1,4 @@
-package com.example.android.carshop;
+package com.example.android.carshop.list;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
@@ -17,8 +17,11 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.android.carshop.MainActivity;
+import com.example.android.carshop.R;
 import com.example.android.carshop.database.AppDatabase;
-import com.example.android.carshop.database.Car;
+import com.example.android.carshop.model.Car;
+import com.example.android.carshop.model.CarMapper;
 
 import java.util.ArrayList;
 
