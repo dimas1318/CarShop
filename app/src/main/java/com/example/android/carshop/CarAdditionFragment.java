@@ -89,7 +89,6 @@ public class CarAdditionFragment extends Fragment {
                 database.carDao().addCar(new Car(selectedUri,
                         modelEditText.getText().toString(),
                         priceEditText.getText().toString())))
-                .delay(3, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnTerminate(() -> {

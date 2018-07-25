@@ -4,4 +4,6 @@
     <string name="price">Цена</string>
     <string name="save">Сохранить</string>
     <string name="no_cars">Нет ни одной машины</string>
+    <string name="edit">Изменить</string>
+    <string name="delete">Удалить</string>
 </resources>
